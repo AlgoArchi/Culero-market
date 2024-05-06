@@ -7,6 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { showToast } from "@/utils/toastUtils";
+import { subscribe } from "@/firebase/subscriber";
 
 type Inputs = {
     email: string
@@ -22,9 +23,15 @@ const Description = () => {
     const formOptions = { resolver: yupResolver(formSchema) }
     const { register, handleSubmit } = useForm(formOptions)
 
-    const   onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const onSubmit: SubmitHandler<Inputs> = async (data) => {
         console.log("data ", data);
-        await showToast('success', 'Successfully submitted your email!');
+        const subscribed = await subscribe(data.email);
+        if(subscribed.result) {
+            showToast('success', 'Successfully submitted your email!');
+        } else {
+            console.log("subscribed error", subscribed.error);
+            showToast('error', 'Not able to subscribe your email');
+        }
     }
 
 
